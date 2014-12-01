@@ -4,7 +4,6 @@
 	<li role="presentation" class="active"><a href="#">Home</a></li>
 	<li role="presentation"><a href="../bids">Find Projects</a></li>
 	<li role="presentation"><a href="../teams" data-no-turbolink="true">Browse Teams</a></li>
-	<li role="presentation"><a href="#">Messages</a></li>
 	<li role="presentation">
 		<%= link_to 'Back', login_path %>
 	</li>
@@ -284,7 +283,7 @@
 		<div class="panel-body">
 		<% pending_contracts = JoinTeamContract.where(:student_id => @student.id, :team_accepted => true, :student_accepted => false) %>
 			<p>
-				You are not on a team. <a href="#">Click here to find a team.</a>
+				You are not on a team. <a href="../teams">Click here to find a team.</a>
 				<% if !pending_contracts.nil? and !pending_contracts.empty? %>
 					Alternatively, accept an invitation from one of the following teams below:<br />
 				<% end %>
