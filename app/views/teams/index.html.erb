@@ -26,15 +26,17 @@
 
       <tbody>
         <% @teams.each do |team| %>
-          <tr>
-              <td><%= team.name %></td>
-              <td>Random Project Name</td>
-              <td><%= team.point_of_contact.first_name + ' ' +
-                      team.point_of_contact.last_name %></td>
-              <td><%= team.students.length %></td>
-              <td><%= team.created_at %></td>
-              <td><%= link_to 'Click to Join', team_path(id: team.id)%></td>
-          </tr>
+          <% if team.students.length < 4 %>
+            <tr>
+                <td><%= team.name %></td>
+                <td>Random Project Name</td>
+                <td><%= team.point_of_contact.first_name + ' ' +
+                        team.point_of_contact.last_name %></td>
+                <td><%= team.students.length %></td>
+                <td><%= team.created_at %></td>
+                <td><%= link_to 'Click to Join', team_path(id: team.id)%></td>
+            </tr>
+          <% end %>
         <% end %>
       </tbody>
     </table>
