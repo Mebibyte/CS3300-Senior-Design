@@ -71,6 +71,7 @@
 			lookup.sub! "+", " "
 			lookup_first_name = lookup.split(" ")[0]
 			lookup_last_name = lookup.split(" ")[1]
+			lookup_object = Student.find_by(first_name: lookup_first_name, last_name: lookup_last_name)
 		end
 	end
 %>
@@ -125,7 +126,7 @@
 					</div>
 				</div>
 				
-				<% unless lookup.nil? %>
+				<% if !lookup.nil? and !lookup_object.nil? %>
 					<div class="panel panel-default">
 						<div class="panel-heading">
 							<div class="row">
@@ -143,7 +144,6 @@
 						</div>
 						<div class="panel-body">
 							<div id="collapseOne" class="panel-collapse collapse in">
-								<% lookup_object = Student.find_by(first_name: lookup_first_name, last_name: lookup_last_name) %>
 								<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
 								<p>
 									<ul>
