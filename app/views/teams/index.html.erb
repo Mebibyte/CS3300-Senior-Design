@@ -39,11 +39,38 @@
 			border-bottom-color: transparent;
 </style>
 
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script type="text/javascript">
+	$(function() { 
+		var availableStudents = <%= Student.all.map { |s| s.full_name.html_safe }.to_json.html_safe %>;
+		$("#student_search_field").autocomplete({
+			autoFocus: true,
+			delay: 100,
+			minLength: 1,
+			source: function(request, response) {
+        var results = $.ui.autocomplete.filter(availableStudents, request.term);
+        response(results.slice(0, 10));
+			}, 
+			select: function (a, b) {
+				$(this).val(b.item.value);
+				$("#student_search_form").submit();
+			}
+		});
+});
+</script>
+
 <!--Parses the query string available in the html bar-->
 <% query_string = request.query_string
 	 unless query_string.nil?
-		if query_string.include? "sort-method"
+		if query_string.include? "sort_method"
 			sort_method = query_string.split("=")[1]
+		elsif query_string.include? "student_search_name"
+			lookup = query_string.split("=")[1]
+			lookup.sub! "+", " "
+			lookup_first_name = lookup.split(" ")[0]
+			lookup_last_name = lookup.split(" ")[1]
 		end
 	end
 %>
@@ -51,7 +78,7 @@
 <!--This form effectively "refreshes" the page, populating the query string in the html bar-->
 <!--with a sort method corresponding to the user-chosen one, which ruby parses with the method above--> 
 <form id="sort-method-form" method="get" action="/teams">
-	<input type="hidden" name="sort-method" id="hidden-sort-method" value="team_name" />
+	<input type="hidden" name="sort_method" id="hidden-sort-method" value="team_name" />
 </form>
 
 <h1>Listing teams</h1>
@@ -91,7 +118,45 @@
 							</ul>
 						</div>
 					</div>
+					<div class="col col-md-2">
+						<form id="student_search_form" action="../teams" method="get">
+							<input type="text" id="student_search_field" name="student_search_name" class="form-control" placeholder="Student Search" />
+						</form>
+					</div>
 				</div>
+				
+				<% unless lookup.nil? %>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col col-md-10">
+									<h2 class="panel-title" style="text-align: center">Student Information for <%= lookup %></h2>
+								</div>
+								<div class="col col-d-2">
+									<span style="float: right; margin-right: 10px">
+										<a data-toggle="collapse" data-target="#collapseOne" href="#collapseOne">
+											<u>Hide</u>
+										</a>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="panel-body">
+							<div id="collapseOne" class="panel-collapse collapse in">
+								<% lookup_object = Student.find_by(first_name: lookup_first_name, last_name: lookup_last_name) %>
+								<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
+								<p>
+									<ul>
+										<li>Email: <%= lookup_object.email.html_safe %></li>
+										<li>Team Name: <%= lookup_team.name.html_safe %></li>
+										<li>Number of Members: <%= lookup_team.students.length.to_s.html_safe %></li>
+									</ul>
+								</p>
+							</div>
+						</div>
+					</div>
+				<% end %>
+				
 				<table class="table" style="border: 1px solid rgb(221, 221, 221)" width="100%">
 					<thead>
 						<tr>
@@ -184,7 +249,7 @@
 				<% end %>
 				<p>
 					<hr />
-					<strong>*</strong> The team to which you sent the invitation request must first accept your invitation before you officially join the team.
+					<strong>*</strong> The team to which you sent the invitation request must first accept your request before you officially join the team.
 				</p>
 			</div>
 			<div class="tab-pane" id="tab2">
@@ -237,7 +302,7 @@
 				<% end %>
 				<p>
 					<hr />
-					<strong>*</strong> The student has already been extended an invitation by someone in your team. 
+					<strong>*</strong> The student has already been extended an invitation by someone on your team. 
 				</p>
 			</div>
 		</div>
