@@ -4,7 +4,6 @@
   <li role="presentation" class="active"><a href="#">Home</a></li>
   <li role="presentation"><a href="#">Find Projects</a></li>
   <li role="presentation"><a href="../teams">Browse Teams</a></li>
-  <li role="presentation"><a href="#">Messages</a></li>
   <li role="presentation">
     <%= link_to 'Back', teams_path %>
   </li>
@@ -53,13 +52,7 @@
   </div>
 </div>
   
-<% if logged_in? &&
-     !on_team?(current_student, @team) &&
-     !contract_exists?(current_student, @team) %>
-  <%= form_for request_to_join_team(current_student, @team) do |f| %>
-    <%= f.submit "Send Join Request" %>
-  <% end %>
-<% end %>
+
 
 <div class="panel panel-primary">
   <div class="panel-heading">

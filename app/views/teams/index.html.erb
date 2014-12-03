@@ -1,3 +1,4 @@
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
 <style>
 	/*Panel tabs*/
 	.panel-tabs {
@@ -42,8 +43,14 @@
 <!--Parses the query string available in the html bar-->
 <% query_string = request.query_string
 	 unless query_string.nil?
-		if query_string.include? "sort-method"
+		if query_string.include? "sort_method"
 			sort_method = query_string.split("=")[1]
+		elsif query_string.include? "student_search_name"
+			lookup = query_string.split("=")[1]
+			lookup.sub! "+", " "
+			lookup_first_name = lookup.split(" ")[0]
+			lookup_last_name = lookup.split(" ")[1]
+			lookup_object = Student.find_by(first_name: lookup_first_name, last_name: lookup_last_name)
 		end
 	end
 %>
@@ -51,7 +58,7 @@
 <!--This form effectively "refreshes" the page, populating the query string in the html bar-->
 <!--with a sort method corresponding to the user-chosen one, which ruby parses with the method above--> 
 <form id="sort-method-form" method="get" action="/teams">
-	<input type="hidden" name="sort-method" id="hidden-sort-method" value="team_name" />
+	<input type="hidden" name="sort_method" id="hidden-sort-method" value="team_name" />
 </form>
 
 <h1>Listing teams</h1>
@@ -61,6 +68,7 @@
 <% if current_student.team_id.nil? %>
 	<li role="presentation"><%= link_to 'Create New Team', new_team_path %></li>
 <% end %>
+	<li role="presentation"><a href="../bids" data-no-turbolink="true">Find Projects</a></li>
 </ul><br />
 
 <div class="panel panel-primary">
@@ -70,6 +78,7 @@
 			<ul class="nav panel-tabs">
 					<li class="active"><a href="#tab1" data-toggle="tab">List Teams</a></li>
 					<li><a href="#tab2" data-toggle="tab">List Teamless Students</a></li>
+					<li><a href="#tab3" data-toggle="tab">List All Students</a></li>
 			</ul>
 		</span>
   </div>
@@ -91,7 +100,49 @@
 							</ul>
 						</div>
 					</div>
+					<div class="col col-md-2">
+						<form id="student_search_form" action="../teams" method="get">
+							<input type="text" id="student_search_field" name="student_search_name" class="form-control" placeholder="Student Search" />
+						</form>
+					</div>
 				</div>
+				
+				<% if !lookup.nil? and !lookup_object.nil? %>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col col-md-10">
+									<h2 class="panel-title" style="text-align: center">Student Information for <%= lookup %></h2>
+								</div>
+								<div class="col col-d-2">
+									<span style="float: right; margin-right: 10px">
+										<a data-toggle="collapse" data-target="#collapseOne" href="#collapseOne">
+											<u>Hide</u>
+										</a>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="panel-body">
+							<div id="collapseOne" class="panel-collapse collapse in">
+								<p>
+									<ul>
+										<li>Email: <%= lookup_object.email.html_safe %></li>
+										<li><a href="../students/<%= lookup_object.id %>" target="_blank">Student Page</a></li>
+									<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
+									<% unless lookup_team.nil? %>
+										<hr />
+										<li>Team Name: <%= lookup_team.name.html_safe %></li>
+										<li>Team Size: <%= lookup_team.students.length.to_s.html_safe %></li>
+										<li><a href="../teams/<%= lookup_team.id %>" target="_blank">Team Page</a></li>
+									<% end %>
+									</ul>
+								</p>
+							</div>
+						</div>
+					</div>
+				<% end %>
+				
 				<table class="table" style="border: 1px solid rgb(221, 221, 221)" width="100%">
 					<thead>
 						<tr>
@@ -101,7 +152,7 @@
 							<th width="10%">Number of Members</th>
 							<th width="20%">Creation Date</th>
 							<th width="4%">View Team</th>
-						<% if current_student.team_id.nil? %>
+						<% if current_student.team_id.nil? or Team.find_by_id(current_student.team_id).nil? %>
 							<th width="11%">Join Team</th>
 						<% end %>
 						</tr>
@@ -130,7 +181,6 @@
 							 if !team.point_of_contact.nil?
 							 	team_info += '<br />Contact: ' + '<u>' + team.point_of_contact.email + '</u>'
 							 end
-							 
 						%>		
 					
 						<% if current_student.team_id == team.id %>
@@ -155,7 +205,7 @@
 							<td><%= team.students.length %></td>
 							<td><%= team.created_at %></td>
 							<td><a href="/teams/<%=team.id%>" target="_blank">View</a></td>
-						<% if current_student.team_id.nil? %>
+						<% if current_student.team_id.nil? or Team.find_by_id(current_student.team_id).nil? %>
 							<% current_contract = JoinTeamContract.where(:student_id => current_student.id, 
 										:team_id => team.id, :team_accepted => false, :student_accepted => true).first %>
 							<% if current_contract.nil? %>
@@ -184,7 +234,7 @@
 				<% end %>
 				<p>
 					<hr />
-					<strong>*</strong> The team to which you sent the invitation request must first accept your invitation before you officially join the team.
+					<strong>*</strong> The team to which you sent the invitation request must first accept your request before you officially join the team.
 				</p>
 			</div>
 			<div class="tab-pane" id="tab2">
@@ -200,26 +250,33 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% teamless_students = Student.where(:team_id => nil) %>
-						<% teamless_students.each do |student| %>
-							<tr>
-								<td><%= student.full_name %></td>
-								<td><%= student.email %></td>
-								<td><%= link_to 'View', student_path(id: student.id) %></td>
-								<% unless current_student.team_id.nil? %>
-									<% current_contract = JoinTeamContract.where(:student_id => student.id, 
-										:team_id => current_student.team_id, :team_accepted => true, :student_accepted => false).first %>
-									<% if current_contract.nil? %>
-										<td width="20%">
-											<button 
-												type="button"
-												class="btn btn-sm btn-default"
-												onclick="send_invite_to('<%= student.full_name.html_safe %>', '<%= student.id.to_s.html_safe %>');">
-												Send Invite
-											</button>
-										</td>
-									<% else %>
-										<td>Already Invited <strong>*</strong></td>
+						<% Student.all.each do |student| %>
+							<% if student.team_id.nil? or Team.find_by_id(student.team_id).nil? %>
+								<% if student.id == current_student.id %>
+								<tr class="alert alert-success">
+								<% else %>
+								<tr>
+								<% end %>
+									<td><%= student.full_name %></td>
+									<td><%= student.email %></td>
+									<td><%= link_to 'View', student_path(id: student.id) %></td>
+									<% unless current_student.team_id.nil? %>
+										<% current_contract = JoinTeamContract.where(:student_id => student.id, 
+											:team_id => current_student.team_id, :team_accepted => true, :student_accepted => false).first %>
+										<% if student.id == current_student.id %>
+											<td></td>
+										<% elsif current_contract.nil? %>
+											<td width="20%">
+												<button 
+													type="button"
+													class="btn btn-sm btn-default"
+													onclick="send_invite_to('<%= student.full_name.html_safe %>', '<%= student.id.to_s.html_safe %>');">
+													Send Invite
+												</button>
+											</td>
+										<% else %>
+											<td>Already Invited <strong>*</strong></td>
+										<% end %>
 									<% end %>
 								<% end %>
 							</tr>
@@ -237,13 +294,47 @@
 				<% end %>
 				<p>
 					<hr />
-					<strong>*</strong> The student has already been extended an invitation by someone in your team. 
+					<strong>*</strong> The student has already been extended an invitation by someone on your team. 
 				</p>
+			</div>
+			<div class="tab-pane" id="tab3">
+				<table class="table" style="border: 1px solid rgb(221, 221, 221)">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Team Name</th>
+          <th>Project</th>
+          <th>Point of Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% Student.all.each do |student| %>
+        <% team = Team.find_by_id(student.team_id) %>
+          <tr>
+            <td><%= student.first_name + ' ' + student.last_name %></td>
+            <% unless team.nil? %>
+              <td><%= team.name %></td>
+            <% else %>
+              <td>N/A</td>
+            <% end %>
+            <td>Random Project Name</td>
+            <% unless team.nil? %>
+              <% poc = Student.find_by(first_name: team.point_of_contact.first_name,
+                                       last_name: team.point_of_contact.last_name) %>
+              <td><%= poc.first_name + ' ' + poc.last_name %></td>
+            <% else %>
+              <td>N/A</td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
 			</div>
 		</div>
   </div>
 </div>
 
+<script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 <script>
 	$(document).ready(function() {
 		$form = $('#sort-method-form');
@@ -271,6 +362,21 @@
 			console.log('Sorting teams by team creation date.');
 			$('#hidden-sort-method').val('creation_date');
 			$form.submit();
+		});
+		
+		var availableStudents = <%= Student.all.map { |s| s.full_name }.to_json.html_safe %>;
+		$("#student_search_field").autocomplete({
+			autoFocus: true,
+			delay: 100,
+			minLength: 1,
+			source: function(request, response) {
+        var results = $.ui.autocomplete.filter(availableStudents, request.term);
+        response(results.slice(0, 10));
+			}, 
+			select: function (a, b) {
+				$(this).val(b.item.value);
+				$("#student_search_form").submit();
+			}
 		});
 	});
 	

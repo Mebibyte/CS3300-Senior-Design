@@ -48,7 +48,6 @@ class BidsController < ApplicationController
 					current_team = Team.find_by_id(current_student.team_id)
 					new_bid_idx = current_team.bids.find_index {|item| item.id == @bid.id}
 					current_team.bids[new_bid_idx].priority = @bid.priority
-					
 				end
         format.html { redirect_to (:back), notice: 'Bid was successfully updated.' }
         format.json { head :no_content }
@@ -63,6 +62,8 @@ class BidsController < ApplicationController
   # DELETE /bids/1.json
   def destroy
     @bid.destroy
+		current_team = Team.find_by_id(current_student.team_id)
+		current_team.bids.delete(@bid)
     respond_to do |format|
       format.html { redirect_to bids_url }
       format.json { head :no_content }
