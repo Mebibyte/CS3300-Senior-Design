@@ -14,7 +14,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/show
   def show
-    redirect_to(:action => 'new')
+    redirect_to(:action => 'show')
   end
 
   # GET /projects/1/edit
@@ -28,7 +28,7 @@ class ProjectsController < ApplicationController
     puts(params)
     respond_to do |format|
       if @project.save
-        format.html { redirect_to @project, notice: 'Project was successfully created.' }
+        format.html { render action: 'show', notice: 'Project was successfully created.' }
         format.json { render action: 'show', status: :created, location: @project }
       else
         format.html { render action: 'new' }
