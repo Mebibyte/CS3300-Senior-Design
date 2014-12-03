@@ -44,7 +44,7 @@
 <script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 <script type="text/javascript">
 	$(function() { 
-		var availableStudents = <%= Student.all.map { |s| s.full_name.html_safe }.to_json.html_safe %>;
+		var availableStudents = <%= Student.all.map { |s| s.full_name }.to_json.html_safe %>;
 		$("#student_search_field").autocomplete({
 			autoFocus: true,
 			delay: 100,
@@ -89,6 +89,7 @@
 <% if current_student.team_id.nil? %>
 	<li role="presentation"><%= link_to 'Create New Team', new_team_path %></li>
 <% end %>
+	<li role="presentation"><a href="../bids" data-no-turbolink="true">Find Projects</a></li>
 </ul><br />
 
 <div class="panel panel-primary">
