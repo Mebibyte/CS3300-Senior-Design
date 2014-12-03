@@ -91,7 +91,7 @@
 								<% project_name = "Random Name " + i.to_s %>
 								<td><%= project_name %></td>
 								<td>Random Sponsor <%= i %></td>
-								<td></td>
+								<td><%= Bid.where(:project_id => i).length %></td>
 								<td><a href="#">View</a></td>
 								<td>
 								<% preexisting_bid = Bid.where(project_id: i, team_id: current_student.team_id).first %>
