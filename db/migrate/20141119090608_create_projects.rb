@@ -19,7 +19,7 @@ class CreateProjects < ActiveRecord::Migration
       t.boolean :nda_required
       t.boolean :funding_commitment
       t.boolean :company_email_conf
-
+      t.integer :approval
       t.timestamps
     end
   end

@@ -58,6 +58,7 @@ ActiveRecord::Schema.define(version: 20141201070331) do
     t.boolean  "nda_required"
     t.boolean  "funding_commitment"
     t.boolean  "company_email_conf"
+    t.integer  "approval"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
