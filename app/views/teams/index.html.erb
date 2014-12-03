@@ -149,13 +149,13 @@
 								<p>
 									<ul>
 										<li>Email: <%= lookup_object.email.html_safe %></li>
-										<li><a href="../students/<%= lookup_object.id %>">Student Page</a></li>
+										<li><a href="../students/<%= lookup_object.id %>" target="_blank">Student Page</a></li>
 									<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
 									<% unless lookup_team.nil? %>
 										<hr />
 										<li>Team Name: <%= lookup_team.name.html_safe %></li>
 										<li>Team Size: <%= lookup_team.students.length.to_s.html_safe %></li>
-										<li><%= link_to "Team Page", team_path(lookup_team) %></li>
+										<li><a href="../teams/<%= lookup_team.id %>" target="_blank">Team Page</a></li>
 									<% end %>
 									</ul>
 								</p>
