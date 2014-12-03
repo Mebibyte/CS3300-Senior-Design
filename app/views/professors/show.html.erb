@@ -94,8 +94,8 @@
 	    	<tr>
               	   <td><%= project.name %></td>
                    <td><%= project.company_name %></td>
-		   <td><input class="btn btn-primary" name="commit" type="submit" value="Approve Project"></td>
-		   <td><input class="btn btn-primary" name="commit" type="submit" value="Reject Project"></td>
+		   <td><%= submit_tag "Accept", :class=>"btn btn-default"%></td
+		   <td><input class="btn btn-primary" name="commit" type="approval" value="Reject Project"></td>
             	</tr>
 	    <% end %>
           <% end %>

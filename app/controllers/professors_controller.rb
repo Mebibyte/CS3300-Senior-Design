@@ -25,6 +25,15 @@ class ProfessorsController < ApplicationController
   def edit
   end
 
+
+  # POST /professors/accept
+  def accept
+	@project = Project.find(params[:id])
+	if @project.update_attribute(:approval,2)
+		redirect_to :action => 'show'
+	end
+  end
+
   # POST /professors
   # POST /professors.json
   def create

@@ -55,7 +55,8 @@ class ProjectsController < ApplicationController
             :solutions,
             :nda_required,
             :funding_commitment,
-            :company_email_conf
+            :company_email_conf,
+	    :approval
       )
     end
 end
