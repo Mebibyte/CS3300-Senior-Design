@@ -1,6 +1,7 @@
 <style>
 	h2 {
-		font-size: 26px;
+		font-size: 22px !important;
+		text-align: center;
 		color: black;
 	}
 	.bid_table_td {
@@ -21,6 +22,18 @@
 	.dragging {
 		color: white !important;
 		background-color: #337AB7 !important;
+	}
+	div.scrollable {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+	}
+	#sort tr {
+		cursor: move;
 	}
 </style>
 
@@ -67,13 +80,21 @@
 		}).disableSelection();
 	} 
 </script>
+<ul class="nav nav-pills">
+	<li role="presentation" class="active"><%= link_to 'Home', students_path() + '/' + current_student.id.to_s %></a></li>
+	<li role="presentation"><a href="../teams" data-no-turbolink="true">Browse Teams</a></li>
+</ul><br />
 
 <% current_team = Team.find_by_id(current_student.team_id) %>
 <div class="row">
 	<div class="col col-md-7">
 		<div class="pull-left">
-			<h2>Available Projects</h2>
-			<div class="panel panel-primary">
+			<div class="panel panel-primary" id="available_projects_panel">
+				<div class="panel-heading">
+					<div class="panel-heading">
+						<h2 class="panel-title">Available Projects</h2>
+					</div>
+				</div>
 				<div class="panel-body">
 					<table class="table table-striped" width="100%">
 						<thead>
@@ -82,7 +103,9 @@
 								<th>Sponsor</th>
 								<th width="10%">No. of Current Bids</th>
 								<th>View Details</th>
+							<% unless current_team.nil? %>
 								<th>Place Bid</th>
+							<% end %>
 							</tr>
 						</thead>
 						<tbody>
@@ -91,19 +114,23 @@
 								<% project_name = "Random Name " + i.to_s %>
 								<td><%= project_name %></td>
 								<td>Random Sponsor <%= i %></td>
-								<td></td>
+								<td><%= Bid.where(:project_id => i).length %></td>
 								<td><a href="#">View</a></td>
 								<td>
-								<% preexisting_bid = Bid.where(project_id: i, team_id: current_student.team_id).first %>
-								<% if preexisting_bid.nil? %>
-									<button 
-										type="button" 
-										class="btn btn-sm btn-default"
-										onclick="place_bid('<%= project_name.html_safe %>', '<%= i.to_s.html_safe %>');">
-										Bid
-									</button>
-								<% else %>
-									Bid Placed <strong>*</strong>
+								<% unless current_team.nil? %>
+									<% preexisting_bid = Bid.where(project_id: i, team_id: current_student.team_id).first %>
+									<% if preexisting_bid.nil? %>
+										<button 
+											type="button" 
+											class="btn btn-sm btn-default"
+											data-toggle="modal" 
+											data-target="#place-bid-modal"
+											onclick="place_bid('<%= project_name.html_safe %>', '<%= i.to_s.html_safe %>');">
+											Bid
+										</button>
+									<% else %>
+										Bid Placed <strong>*</strong>
+									<% end %>
 								<% end %>
 								</td>
 							</tr>
@@ -111,42 +138,51 @@
 						</tbody>
 					</table>
 					<hr />
-					<p><strong>*</strong> One of your team members has already bid on this project.</p>
-					<%= form_for Bid.new do |f| %>
-						<%= f.hidden_field :project_id, id: "bid_form_project_id" %>
-						<%= f.hidden_field :team_id, value: current_student.team_id %>
-						<%= f.hidden_field :priority, value: (Team.find(current_student.team_id).bids.length + 1) %>
-						<div style="display: none">
-							<%= f.submit "Submit", id: "bid_form_submit" %>
-						</div>
-					<% end %>
+					<p><strong>*</strong> One of your team members has already bid on this project.</p>	
 				</div>
 			</div>
 		</div>
 	</div>
+<% unless current_team.nil? %>
 	<div class="col col-md-5">
 		<div class="pull-left">
-			<h2><%= current_team.name %>&rsquo;s Active Bids</h2>
-			<div class="panel panel-primary">
+			<div class="panel panel-default" id="team_bids_panel">
+				<div class="panel-heading">
+					<div class="panel-heading">
+						<h2 class="panel-title"><%= current_team.name %>&rsquo;s Active Bids</h2>
+					</div>
+				</div>
 				<div class="panel-body">
 					<div id="bid_div_wrapper"> 
-						<table id="sort" class="table table-striped grid" width="100%">
+						<table id="sort" class="table table-striped grid" width="100%" style="table-layout: fixed">
 							<thead>
 								<tr>
-									<th class="index" width="10%">Priority</th>
-									<th width="40%">Project Name</th>
-									<th width="35%">Sponsor</th>
-									<th width="10%">View Details</th>
+									<th class="index" width="15%">Priority</th>
+									<th width="25%">Project Name</th>
+									<th width="25%">Sponsor</th>
+									<th width="15%">Edit / Delete</th>
 								</tr>
 							</thead>
 							<tbody>
 							<% bid_count = 1 %>
 							<% current_team.bids.order("priority").each do |bid| %>
+								<% modal_id = "edit_bid_modal_" + bid_count.to_s.html_safe %>
+								<% modal_label = "edit_bid_modal_label_" + bid_count.to_s.html_safe %>
 								<tr>
-									<td class="index"><%= bid.priority %></td>
-									<td>Project id: <%= bid.project_id %></td>
-									<td>Random Sponsor <%= bid_count %></td>
-									<td><%= link_to "View", bid_path(bid.id) %></td>
+									<td class="index"><div class="scrollable"><%= bid.priority %></div></td>
+									<td><div class="scrollable">Project id: <%= bid.project_id %></div></td>
+									<td><div class="scrollable">Random Sponsor <%= bid_count %></div></td>
+									<td>
+										<div class="row" style="width: 100%">
+											<div class="col col-md-6" style="width: 50%">
+												<button type="button" class="btn btn-sm btn-warning" data-toggle="modal" 
+													data-target="#<%= modal_id %>" style="width: 30px">E</button>
+											</div>
+											<div class="col col-md-6" style="width: 50%">
+												<%= button_to "D", bid, :method=> :delete, :class=> "btn btn-sm btn-danger", :style => "width: 30px", 
+													:confirm => "Are you sure you want to delete this bid?" %>
+											</div>
+									</td>
 								</tr>
 								<%= form_for bid, class: "edit_bid" do |f| %>
 									<%= f.hidden_field :priority, class: "edit_bid_form_priority", id: "edit_bid_form_priority_" + bid_count.to_s %>
@@ -154,6 +190,38 @@
 										<%= f.submit "Submit", id: "edit_bid_form_submit_" + bid_count.to_s %>
 									</div>
 								<% end %>
+								
+								<div class="modal fade" id="<%= modal_id %>" tabindex="-1" role="dialog" aria-labelledby="<%= modal_label %>" aria-hidden="true">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+												<h4 class="modal-title">Edit Bid for Project id: <%= bid.project_id %></h4>
+											</div>
+												<%= form_for bid do |f| %>
+												<div class="modal-body">
+													<div class="well">
+														<p>Update your bid information below. Remember to list any qualifications and experience 
+															you believe will help your group in being assigned to this project.
+														</p>
+													</div>
+													<%= f.text_area :bid_text, :size => "40x10", :class => "form-control", :value => bid.bid_text %><br />
+												</div>
+												<div class="modal-footer">
+													<div class="row">
+														<div class="col col-md-3">
+															<%= f.submit "Update Bid", :class => "btn btn-warning" %>
+														</div>
+														<div class="col col-md-9">
+															<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+														</div>
+													</div>
+												</div>
+												<% end %>
+										</div>
+									</div>
+								</div>
+								
 								<% bid_count = bid_count + 1 %>
 							<% end %>
 							</tbody>
@@ -165,33 +233,90 @@
 			</div>
 		</div>
 	</div>
+<% else %>
+	<div class="col col-md-5">
+		<div class="pull-left">
+			<div class="alert alert-info">
+				Note: You cannot place any bids until you are on a team.
+			</div>
+		</div>
+	</div>
+<% end %>
 </div>
 
+<% unless current_team.nil? %>
+	<div class="modal fade" id="place-bid-modal" tabindex="-1" role="dialog" aria-labelledby="place-bid-modal-label" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Place Bid on <span id="bid_modal_project_name"></span></h4>
+				</div>
+					<%= form_for Bid.new do |f| %>
+					<div class="modal-body">
+						<%= f.hidden_field :project_id, id: "bid_form_project_id" %>
+						<%= f.hidden_field :team_id, value: current_student.team_id %>
+						<%= f.hidden_field :priority, value: (Team.find(current_student.team_id).bids.length + 1) %>
+						<div class="well">
+							<p>Briefly explain why you and your group are interested in working on this project.
+								List any qualifications and experience you believe will help your group in being assigned to this project.
+							</p>
+						</div>
+						<%= f.text_area :bid_text, :size => "40x10", :class => "form-control" %><br />
+					</div>
+					<div class="modal-footer">
+						<div class="row">
+							<div class="col col-md-3">
+								<%= f.submit "Place Bid", :class => "btn btn-primary" %>
+							</div>
+							<div class="col col-md-9">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+					<% end %>
+			</div>
+		</div>
+	</div>
+<% end %>
+
 <script>
-	$(document).ready(function() {
-		$('table').on('click', '.move-up', function () {
-			var thisRow = $(this).closest('tr');
-			var prevRow = thisRow.prev();
-			if (prevRow.length) {
-					prevRow.before(thisRow);
+	document.getElementById("available_projects_panel").addEventListener("mouseover", function() {
+		var otherPanel = document.getElementById("team_bids_panel");
+		if (!this.classList.contains('panel-primary')) { 
+			if (this.classList.contains('panel-default')) {
+				this.classList.remove('panel-default');
 			}
-		});
-		
-		$('table').on('click', '.move-down', function () {
-			var thisRow = $(this).closest('tr');
-			var nextRow = thisRow.next();
-			if (nextRow.length) {
-					nextRow.after(thisRow);
+			this.classList.add('panel-primary');
+			if (otherPanel.classList.contains('panel-primary')) {
+				otherPanel.classList.remove('panel-primary');
+				otherPanel.classList.add('panel-default');
 			}
-		});
+		}
+	});
+
+	document.getElementById("team_bids_panel").addEventListener("mouseover", function() {
+		var otherPanel = document.getElementById("available_projects_panel");
+		if (!this.classList.contains('panel-primary')) { 
+			if (this.classList.contains('panel-default')) {
+				this.classList.remove('panel-default');
+			}
+			this.classList.add('panel-primary');
+			if (otherPanel.classList.contains('panel-primary')) {
+				otherPanel.classList.remove('panel-primary');
+				otherPanel.classList.add('panel-default');
+			}
+		}
 	});
 
 	function place_bid(project_name, project_id) {
-		var response = confirm("Are you sure you want to bid on project \'" + project_name + "\'?");
-		if (response) {
-			$("#bid_form_project_id").val(project_id);
-			$("#bid_form_submit").click();
-		}
+		$("#bid_form_project_id").val(project_id);
+		$("#bid_modal_project_name").text(project_name);
+	}
+	
+	function edit_bid(project_name, project_id) {
+		$("#bid_form_project_id").val(project_id);
+		$("#bid_modal_project_name").text(project_name);
 	}
 </script>
 		

@@ -2,12 +2,9 @@
 
 <ul class="nav nav-pills">
 	<li role="presentation" class="active"><a href="#">Home</a></li>
-	<li role="presentation"><a href="../bids">Find Projects</a></li>
+	<li role="presentation"><a href="../bids" data-no-turbolink="true">Find Projects</a></li>
 	<li role="presentation"><a href="../teams" data-no-turbolink="true">Browse Teams</a></li>
-	<li role="presentation"><a href="#">Messages</a></li>
-	<li role="presentation">
-		<%= link_to 'Back', login_path %>
-	</li>
+	<li role="presentation"><a href="../login" data-no-turbolink="true">Back</a></li>
 </ul><br />
 
 <div class="panel panel-primary">
@@ -219,7 +216,7 @@
 					<h4 class="panel-title">Actions</h4>
 				</div>
 				<div class="panel-body">
-					<% if logged_in? and !@student.team_id.nil? %>
+					<% if logged_in? and !@student.team_id.nil? and !Team.find_by_id(@student.team_id).nil? %>
 						<%= form_for @student do |f| %>
 							<%= f.hidden_field :team_id, :class => "form-control" %>
 							<div style="display:inline-block; float:right">
@@ -274,7 +271,7 @@
 		</div>
 	</div>
 	
-<% elsif current_student == @student and current_student.team_id.nil? %>
+<% elsif current_student == @student and (current_student.team_id.nil? or team.nil?) %>
 	<div class="panel panel-danger">
 		<div class="panel-heading">
 			<div class="panel-heading">
@@ -284,7 +281,7 @@
 		<div class="panel-body">
 		<% pending_contracts = JoinTeamContract.where(:student_id => @student.id, :team_accepted => true, :student_accepted => false) %>
 			<p>
-				You are not on a team. <a href="#">Click here to find a team.</a>
+				You are not on a team. <a href="../teams">Click here to find a team.</a>
 				<% if !pending_contracts.nil? and !pending_contracts.empty? %>
 					Alternatively, accept an invitation from one of the following teams below:<br />
 				<% end %>
