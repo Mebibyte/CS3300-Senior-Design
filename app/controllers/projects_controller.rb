@@ -14,7 +14,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/show
   def show
-    redirect_to(:action => 'new')
+    redirect_to(:action => 'show')
   end
 
   # GET /projects/1/edit
