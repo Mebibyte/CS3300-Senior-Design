@@ -6,11 +6,14 @@ class ProfessorsController < ApplicationController
   def index
     @professors = Professor.all
   end
+  
+
 
   # GET /professors/1
   # GET /professors/1.json
   def show
     @students = Student.all
+    @projects = Project.all
   end
 
   # GET /professors/new
@@ -20,6 +23,46 @@ class ProfessorsController < ApplicationController
 
   # GET /professors/1/edit
   def edit
+  end
+
+
+  # POST /professors
+  def accept
+	@professor = Professor.find(params[:professor])
+
+	@project = Project.find(params[:type])
+	@project.update_attribute(:approval,2)
+	respond_to do |format|
+		format.html { redirect_to @professor, notice: 'Project succesfully accepted.' }
+        	format.json { head :no_content }
+	end
+	
+  end
+
+ # POST /professors
+  def removeproject
+        @professor = Professor.find(params[:professor])
+
+        @project = Project.find(params[:type])
+        @project.destroy
+        respond_to do |format|
+                format.html { redirect_to @professor, error: 'Project succesfully rejected.' }
+                format.json { head :no_content }
+        end
+
+  end
+
+ # POST /professors
+  def reject
+        @professor = Professor.find(params[:professor])
+
+        @project = Project.find(params[:type])
+        @project.update_attribute(:approval,3)
+        respond_to do |format|
+                format.html { redirect_to @professor, error: 'Project succesfully rejected.' }
+                format.json { head :no_content }
+        end
+
   end
 
   # POST /professors
