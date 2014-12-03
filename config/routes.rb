@@ -30,6 +30,12 @@ SeniorDesignSite::Application.routes.draw do
   end
   resources :teams
   resources :projects
-
+  resources :professors do
+	collection do
+		post 'accept'
+		post 'reject'
+		post 'removeproject'
+  	end
+  end
   root 'static_pages#home'
 end

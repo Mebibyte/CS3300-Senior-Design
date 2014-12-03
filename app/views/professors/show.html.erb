@@ -85,7 +85,7 @@
           <tr>
             <th>Project</th>
             <th>Company</th>
-            <th>Approve or Disapprove</th>
+            <th>Approve or Reject</th>
           </tr>
         </thead>
         <tbody>
@@ -94,12 +94,81 @@
 	    	<tr>
               	   <td><%= project.name %></td>
                    <td><%= project.company_name %></td>
-		   <td><%= submit_tag "Accept", :class=>"btn btn-default"%></td
-		   <td><input class="btn btn-primary" name="commit" type="approval" value="Reject Project"></td>
-            	</tr>
+		   <td><%= button_to 'Accept', :action=>'accept', :professor=>@professor, :type=>project.id, :remote=>true %></td>
+            	   <td><%= button_to 'Reject', :action=>'reject', :professor=>@professor, :type=>project.id, :remote=>true %></td>
+		</tr>
 	    <% end %>
           <% end %>
         </tbody>
       </table>
     </div>
-</div    
+</div> 
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Approved Projects
+      </h3>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <div class="list-group">
+      <table class="table list-group-item" style="border: 1px solid rgb(221, 221, 221)">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Company</th>
+            <th>Reject</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @projects.each do |project| %>
+            <% if project.approval == 2 %>
+                <tr>
+                   <td><%= project.name %></td>
+                   <td><%= project.company_name %></td>
+                   <td><%= button_to 'Reject', :action=>'reject', :professor=>@professor, :type=>project.id, :remote=>true %></td>
+                </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+</div>
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Rejected Projects
+      </h3>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <div class="list-group">
+      <table class="table list-group-item" style="border: 1px solid rgb(221, 221, 221)">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Company</th>
+	    <th>Rejected Date</th>
+            <th>Approve or Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @projects.each do |project| %>
+            <% if project.approval == 3 %>
+                <tr>
+                   <td><%= project.name %></td>
+                   <td><%= project.company_name %></td>
+		   <td><%= project.updated_at %></td>
+                   <td><%= button_to 'Accept', :action=>'accept', :professor=>@professor, :type=>project.id, :remote=>true %></td>
+                   <td><%= button_to 'Delete', :action=>'removeproject', :professor=>@professor, :type=>project.id, :remote=>true %></td>
+                </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+</div>     

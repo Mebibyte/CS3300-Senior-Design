@@ -26,12 +26,43 @@ class ProfessorsController < ApplicationController
   end
 
 
-  # POST /professors/accept
+  # POST /professors
   def accept
-	@project = Project.find(params[:id])
-	if @project.update_attribute(:approval,2)
-		redirect_to :action => 'show'
+	@professor = Professor.find(params[:professor])
+
+	@project = Project.find(params[:type])
+	@project.update_attribute(:approval,2)
+	respond_to do |format|
+		format.html { redirect_to @professor, notice: 'Project succesfully accepted.' }
+        	format.json { head :no_content }
 	end
+	
+  end
+
+ # POST /professors
+  def removeproject
+        @professor = Professor.find(params[:professor])
+
+        @project = Project.find(params[:type])
+        @project.destroy
+        respond_to do |format|
+                format.html { redirect_to @professor, error: 'Project succesfully rejected.' }
+                format.json { head :no_content }
+        end
+
+  end
+
+ # POST /professors
+  def reject
+        @professor = Professor.find(params[:professor])
+
+        @project = Project.find(params[:type])
+        @project.update_attribute(:approval,3)
+        respond_to do |format|
+                format.html { redirect_to @professor, error: 'Project succesfully rejected.' }
+                format.json { head :no_content }
+        end
+
   end
 
   # POST /professors
