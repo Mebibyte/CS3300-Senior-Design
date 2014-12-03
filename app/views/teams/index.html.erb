@@ -99,6 +99,7 @@
 			<ul class="nav panel-tabs">
 					<li class="active"><a href="#tab1" data-toggle="tab">List Teams</a></li>
 					<li><a href="#tab2" data-toggle="tab">List Teamless Students</a></li>
+					<li><a href="#tab3" data-toggle="tab">List All Students</a></li>
 			</ul>
 		</span>
   </div>
@@ -148,7 +149,7 @@
 								<p>
 									<ul>
 										<li>Email: <%= lookup_object.email.html_safe %></li>
-										<li><%= link_to "Student Page", students_path(lookup_object) %></li>
+										<li><a href="../students/<%= lookup_object.id %>">Student Page</a></li>
 									<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
 									<% unless lookup_team.nil? %>
 										<hr />
@@ -310,6 +311,39 @@
 					<hr />
 					<strong>*</strong> The student has already been extended an invitation by someone on your team. 
 				</p>
+			</div>
+			<div class="tab-pane" id="tab3">
+				<table class="table" style="border: 1px solid rgb(221, 221, 221)">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Team Name</th>
+          <th>Project</th>
+          <th>Point of Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% Student.all.each do |student| %>
+        <% team = Team.find_by_id(student.team_id) %>
+          <tr>
+            <td><%= student.first_name + ' ' + student.last_name %></td>
+            <% unless team.nil? %>
+              <td><%= team.name %></td>
+            <% else %>
+              <td>N/A</td>
+            <% end %>
+            <td>Random Project Name</td>
+            <% unless team.nil? %>
+              <% poc = Student.find_by(first_name: team.point_of_contact.first_name,
+                                       last_name: team.point_of_contact.last_name) %>
+              <td><%= poc.first_name + ' ' + poc.last_name %></td>
+            <% else %>
+              <td>N/A</td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
 			</div>
 		</div>
   </div>
