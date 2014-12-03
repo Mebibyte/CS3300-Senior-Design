@@ -2,6 +2,9 @@
 
 <ul class="nav nav-pills">
   <li role="presentation" class="active"><%= link_to 'Home', root_url %></li>
+	<li role="presentation">
+		<a href="#" data-toggle="modal" data-target="#new_professor_account_modal">Create New Account</a>
+	</li>
 </ul><br />
 
 <div class="panel panel-primary">
@@ -36,4 +39,34 @@
 
 <br>
 
-<%= link_to 'New Professor', new_professor_path %>
+<div class="modal fade" id="new_professor_account_modal" tabindex="-1" role="dialog" 
+	aria-labelledby="new_professor_account_modal_label" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title">Create New Professor Account</h4>
+			</div>
+				<%= form_for Professor.new do |f| %>
+				<div class="modal-body">
+					<%= f.label :first_name, "First Name" %>
+					<%= f.text_field :first_name, :value => "" %>
+					<%= f.label :first_name, "Last Name"%>
+					<%= f.text_field :last_name, :value => "" %>
+					<%= f.label :class, "Class" %>
+					<%= f.text_field :class, :value => ""  %>
+				</div>
+				<div class="modal-footer">
+					<div class="row">
+						<div class="col col-md-4">
+							<%= f.submit "Create New Account", :class => "btn btn-primary" %>
+						</div>
+						<div class="col col-md-8">
+							<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+						</div>
+					</div>
+				</div>
+				<% end %>
+		</div>
+	</div>
+</div>
