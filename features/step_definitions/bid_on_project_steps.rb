@@ -1,3 +1,7 @@
+Given(/^that I am a student$/) do
+    @student = Student.create
+end
+
 When(/^I try to create a bid$/) do
   @bid = make_bid(@student)
 end
