@@ -3,6 +3,7 @@ require 'test_helper'
 class BidsControllerTest < ActionController::TestCase
   setup do
     @bid = bids(:one)
+    @request.env['HTTP_REFERER'] = 'http://test.com/sessions/new'
   end
 
   test "should get index" do
