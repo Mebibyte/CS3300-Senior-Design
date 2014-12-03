@@ -3,6 +3,7 @@ require 'test_helper'
 class JoinTeamContractsControllerTest < ActionController::TestCase
   setup do
     @join_team_contract = join_team_contracts(:one)
+    @request.env['HTTP_REFERER'] = 'http://test.com/sessions/new'
   end
 
   test "should get index" do

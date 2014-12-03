@@ -1,22 +1,30 @@
-Feature: Leave Team
-  in order to join new team
-  as a student
-  I want to Leave current team
-  Scenario: Leave team of size 1
-    Given I am in team of size 1
-    When I click "leave team" button
-  then I am no longer on team, team is dissolved
-  Scenario: Leave team, while acting as point of contact
-    Given I am in team. I am point of contact for team
-    When I click "leave team" button
-      then I am no longer on team, team size is reduced by 1, and other team members are prompted for contact
-      info
-  Scenario: Leave team when team is at the minimum team size
-    Given I am in a team that is at the minimum size
-    When I click "leave team" button
-      then I am no longer on team, team size is reduced by 1, and team is displayed on non­full page
-      Scenario: Leave team when none of above conditions are met
-    Given I am in a team of size greater than 1 but not equal to minimum team size and I am not a point of
-      contact.
-    When I click "leave team" button
-      then I am no longer on team, team size is reduced by 1
+Feature: Leaving a Team
+    As a student
+    I want to be able to leave a team
+    So that I can join another team
+
+    Background:
+        Given that I am a student
+        And I am a member of a team
+
+    Scenario: Student who is the only member of the team leaves a team
+        Given that I am a member of a team
+        When I try to leave a team
+        And the team has no other members
+        Then the team is destroyed
+        And I should not be a member of the team
+
+    Scenario: Student who is the point of contact of the team leaves a team
+        Given that I am a member of a team
+        And I am a point of contact of a team
+        And the team has at least one more member besides me
+        When I try to leave a team
+        Then a new point of contact should be elected from other members of the team
+        And I should not be a member of the team
+
+    Scenario: Student who is not the point of contact of the team leaves a team
+        Given that I am a member of a team
+        And I am not a point of contact of a team
+        And the team has at least one more member besides me
+        When I try to leave a team
+        Then I should not be a member of the team
