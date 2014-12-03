@@ -216,7 +216,7 @@
 					<h4 class="panel-title">Actions</h4>
 				</div>
 				<div class="panel-body">
-					<% if logged_in? and !@student.team_id.nil? %>
+					<% if logged_in? and !@student.team_id.nil? and !Team.find_by_id(@student.team_id).nil? %>
 						<%= form_for @student do |f| %>
 							<%= f.hidden_field :team_id, :class => "form-control" %>
 							<div style="display:inline-block; float:right">
@@ -271,7 +271,7 @@
 		</div>
 	</div>
 	
-<% elsif current_student == @student and current_student.team_id.nil? %>
+<% elsif current_student == @student and (current_student.team_id.nil? or team.nil?) %>
 	<div class="panel panel-danger">
 		<div class="panel-heading">
 			<div class="panel-heading">

@@ -103,7 +103,9 @@
 								<th>Sponsor</th>
 								<th width="10%">No. of Current Bids</th>
 								<th>View Details</th>
+							<% unless current_team.nil? %>
 								<th>Place Bid</th>
+							<% end %>
 							</tr>
 						</thead>
 						<tbody>
@@ -115,18 +117,20 @@
 								<td><%= Bid.where(:project_id => i).length %></td>
 								<td><a href="#">View</a></td>
 								<td>
-								<% preexisting_bid = Bid.where(project_id: i, team_id: current_student.team_id).first %>
-								<% if preexisting_bid.nil? %>
-									<button 
-										type="button" 
-										class="btn btn-sm btn-default"
-										data-toggle="modal" 
-										data-target="#place-bid-modal"
-										onclick="place_bid('<%= project_name.html_safe %>', '<%= i.to_s.html_safe %>');">
-										Bid
-									</button>
-								<% else %>
-									Bid Placed <strong>*</strong>
+								<% unless current_team.nil? %>
+									<% preexisting_bid = Bid.where(project_id: i, team_id: current_student.team_id).first %>
+									<% if preexisting_bid.nil? %>
+										<button 
+											type="button" 
+											class="btn btn-sm btn-default"
+											data-toggle="modal" 
+											data-target="#place-bid-modal"
+											onclick="place_bid('<%= project_name.html_safe %>', '<%= i.to_s.html_safe %>');">
+											Bid
+										</button>
+									<% else %>
+										Bid Placed <strong>*</strong>
+									<% end %>
 								<% end %>
 								</td>
 							</tr>
@@ -139,6 +143,7 @@
 			</div>
 		</div>
 	</div>
+<% unless current_team.nil? %>
 	<div class="col col-md-5">
 		<div class="pull-left">
 			<div class="panel panel-default" id="team_bids_panel">
@@ -228,41 +233,52 @@
 			</div>
 		</div>
 	</div>
+<% else %>
+	<div class="col col-md-5">
+		<div class="pull-left">
+			<div class="alert alert-info">
+				Note: You cannot place any bids until you are on a team.
+			</div>
+		</div>
+	</div>
+<% end %>
 </div>
 
-<div class="modal fade" id="place-bid-modal" tabindex="-1" role="dialog" aria-labelledby="place-bid-modal-label" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title">Place Bid on <span id="bid_modal_project_name"></span></h4>
-      </div>
-				<%= form_for Bid.new do |f| %>
-				<div class="modal-body">
-					<%= f.hidden_field :project_id, id: "bid_form_project_id" %>
-					<%= f.hidden_field :team_id, value: current_student.team_id %>
-					<%= f.hidden_field :priority, value: (Team.find(current_student.team_id).bids.length + 1) %>
-					<div class="well">
-						<p>Briefly explain why you and your group are interested in working on this project.
-							List any qualifications and experience you believe will help your group in being assigned to this project.
-						</p>
-					</div>
-					<%= f.text_area :bid_text, :size => "40x10", :class => "form-control" %><br />
+<% unless current_team.nil? %>
+	<div class="modal fade" id="place-bid-modal" tabindex="-1" role="dialog" aria-labelledby="place-bid-modal-label" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Place Bid on <span id="bid_modal_project_name"></span></h4>
 				</div>
-				<div class="modal-footer">
-					<div class="row">
-						<div class="col col-md-3">
-							<%= f.submit "Place Bid", :class => "btn btn-primary" %>
+					<%= form_for Bid.new do |f| %>
+					<div class="modal-body">
+						<%= f.hidden_field :project_id, id: "bid_form_project_id" %>
+						<%= f.hidden_field :team_id, value: current_student.team_id %>
+						<%= f.hidden_field :priority, value: (Team.find(current_student.team_id).bids.length + 1) %>
+						<div class="well">
+							<p>Briefly explain why you and your group are interested in working on this project.
+								List any qualifications and experience you believe will help your group in being assigned to this project.
+							</p>
 						</div>
-						<div class="col col-md-9">
-							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<%= f.text_area :bid_text, :size => "40x10", :class => "form-control" %><br />
+					</div>
+					<div class="modal-footer">
+						<div class="row">
+							<div class="col col-md-3">
+								<%= f.submit "Place Bid", :class => "btn btn-primary" %>
+							</div>
+							<div class="col col-md-9">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
 						</div>
 					</div>
-				</div>
-				<% end %>
-    </div>
-  </div>
-</div>
+					<% end %>
+			</div>
+		</div>
+	</div>
+<% end %>
 
 <script>
 	document.getElementById("available_projects_panel").addEventListener("mouseover", function() {

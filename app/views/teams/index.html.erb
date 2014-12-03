@@ -1,3 +1,4 @@
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
 <style>
 	/*Panel tabs*/
 	.panel-tabs {
@@ -38,28 +39,6 @@
 			background-color: rgba(255,255,255, .23);
 			border-bottom-color: transparent;
 </style>
-
-<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.js"></script>
-<script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-<script type="text/javascript">
-	$(function() { 
-		var availableStudents = <%= Student.all.map { |s| s.full_name }.to_json.html_safe %>;
-		$("#student_search_field").autocomplete({
-			autoFocus: true,
-			delay: 100,
-			minLength: 1,
-			source: function(request, response) {
-        var results = $.ui.autocomplete.filter(availableStudents, request.term);
-        response(results.slice(0, 10));
-			}, 
-			select: function (a, b) {
-				$(this).val(b.item.value);
-				$("#student_search_form").submit();
-			}
-		});
-});
-</script>
 
 <!--Parses the query string available in the html bar-->
 <% query_string = request.query_string
@@ -173,7 +152,7 @@
 							<th width="10%">Number of Members</th>
 							<th width="20%">Creation Date</th>
 							<th width="4%">View Team</th>
-						<% if current_student.team_id.nil? %>
+						<% if current_student.team_id.nil? or Team.find_by_id(current_student.team_id).nil? %>
 							<th width="11%">Join Team</th>
 						<% end %>
 						</tr>
@@ -202,7 +181,6 @@
 							 if !team.point_of_contact.nil?
 							 	team_info += '<br />Contact: ' + '<u>' + team.point_of_contact.email + '</u>'
 							 end
-							 
 						%>		
 					
 						<% if current_student.team_id == team.id %>
@@ -227,7 +205,7 @@
 							<td><%= team.students.length %></td>
 							<td><%= team.created_at %></td>
 							<td><a href="/teams/<%=team.id%>" target="_blank">View</a></td>
-						<% if current_student.team_id.nil? %>
+						<% if current_student.team_id.nil? or Team.find_by_id(current_student.team_id).nil? %>
 							<% current_contract = JoinTeamContract.where(:student_id => current_student.id, 
 										:team_id => team.id, :team_accepted => false, :student_accepted => true).first %>
 							<% if current_contract.nil? %>
@@ -272,26 +250,33 @@
 						</tr>
 					</thead>
 					<tbody>
-						<% teamless_students = Student.where(:team_id => nil) %>
-						<% teamless_students.each do |student| %>
-							<tr>
-								<td><%= student.full_name %></td>
-								<td><%= student.email %></td>
-								<td><%= link_to 'View', student_path(id: student.id) %></td>
-								<% unless current_student.team_id.nil? %>
-									<% current_contract = JoinTeamContract.where(:student_id => student.id, 
-										:team_id => current_student.team_id, :team_accepted => true, :student_accepted => false).first %>
-									<% if current_contract.nil? %>
-										<td width="20%">
-											<button 
-												type="button"
-												class="btn btn-sm btn-default"
-												onclick="send_invite_to('<%= student.full_name.html_safe %>', '<%= student.id.to_s.html_safe %>');">
-												Send Invite
-											</button>
-										</td>
-									<% else %>
-										<td>Already Invited <strong>*</strong></td>
+						<% Student.all.each do |student| %>
+							<% if student.team_id.nil? or Team.find_by_id(student.team_id).nil? %>
+								<% if student.id == current_student.id %>
+								<tr class="alert alert-success">
+								<% else %>
+								<tr>
+								<% end %>
+									<td><%= student.full_name %></td>
+									<td><%= student.email %></td>
+									<td><%= link_to 'View', student_path(id: student.id) %></td>
+									<% unless current_student.team_id.nil? %>
+										<% current_contract = JoinTeamContract.where(:student_id => student.id, 
+											:team_id => current_student.team_id, :team_accepted => true, :student_accepted => false).first %>
+										<% if student.id == current_student.id %>
+											<td></td>
+										<% elsif current_contract.nil? %>
+											<td width="20%">
+												<button 
+													type="button"
+													class="btn btn-sm btn-default"
+													onclick="send_invite_to('<%= student.full_name.html_safe %>', '<%= student.id.to_s.html_safe %>');">
+													Send Invite
+												</button>
+											</td>
+										<% else %>
+											<td>Already Invited <strong>*</strong></td>
+										<% end %>
 									<% end %>
 								<% end %>
 							</tr>
@@ -349,6 +334,7 @@
   </div>
 </div>
 
+<script type="text/javascript" src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 <script>
 	$(document).ready(function() {
 		$form = $('#sort-method-form');
@@ -376,6 +362,21 @@
 			console.log('Sorting teams by team creation date.');
 			$('#hidden-sort-method').val('creation_date');
 			$form.submit();
+		});
+		
+		var availableStudents = <%= Student.all.map { |s| s.full_name }.to_json.html_safe %>;
+		$("#student_search_field").autocomplete({
+			autoFocus: true,
+			delay: 100,
+			minLength: 1,
+			source: function(request, response) {
+        var results = $.ui.autocomplete.filter(availableStudents, request.term);
+        response(results.slice(0, 10));
+			}, 
+			select: function (a, b) {
+				$(this).val(b.item.value);
+				$("#student_search_form").submit();
+			}
 		});
 	});
 	
