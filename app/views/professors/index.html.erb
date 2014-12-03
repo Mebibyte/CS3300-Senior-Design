@@ -1,3 +1,9 @@
+<style>
+	a.form_btn {
+		color: white !important;
+	}
+</style>
+
 <h1>Listing professors</h1>
 
 <ul class="nav nav-pills">
@@ -50,23 +56,43 @@
 				<%= form_for Professor.new do |f| %>
 				<div class="modal-body">
 					<%= f.label :first_name, "First Name" %>
-					<%= f.text_field :first_name, :value => "" %>
+					<%= f.text_field :first_name, :value => "", :id => "first_name_field" %>
 					<%= f.label :first_name, "Last Name"%>
-					<%= f.text_field :last_name, :value => "" %>
+					<%= f.text_field :last_name, :value => "", :id => "last_name_field" %>
 					<%= f.label :class, "Class" %>
-					<%= f.text_field :class, :value => ""  %>
+					<%= f.text_field :class, :value => "", :id => "class_field"  %>
 				</div>
 				<div class="modal-footer">
 					<div class="row">
 						<div class="col col-md-4">
-							<%= f.submit "Create New Account", :class => "btn btn-primary" %>
+							<a href="#" role="button" class="btn btn-primary form_btn" onclick="verify_form();">Create New Account</a>
 						</div>
 						<div class="col col-md-8">
-							<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+							<a href="#" role="button" class="btn btn-danger form_btn" data-dismiss="modal">Close</a>
 						</div>
 					</div>
+				</div>
+				<div style="display: none">
+					<%= f.submit "", :id => "form_submit" %>
 				</div>
 				<% end %>
 		</div>
 	</div>
 </div>
+
+<script>
+	function verify_form() {
+		var first_name_field = document.getElementById("first_name_field");
+		var last_name_field = document.getElementById("last_name_field");
+		var class_field = document.getElementById("class_field");
+		if (first_name_field.value == "") {
+			alert("First name must not be left blank.");
+		} else if (last_name_field.value == "") {
+			alert("Last name must not be left blank.");
+		} else if (class_field.value == "") {
+			alert("Class field must not be left blank.");
+		} else {
+			document.getElementById("form_submit").click();
+		}
+	}
+</script>
