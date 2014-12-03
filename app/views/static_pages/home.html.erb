@@ -1,17 +1,53 @@
-<div class ="center">
+<style>
+	#first, #third {
+		background-color: #00254C;
+		cursor: pointer;
+	}
+	#second {
+		background-color: #F6B113;
+		cursor: pointer;
+	}
+	#first h3, #second h3, #third h3 {
+		color: white;
+	}
+	#first a, #second a, #third a {
+		color: black !important;
+	}
+</style>
+
+<div class="page-header">
+  <h1>Georgia Tech Capstone Teamfinder <small>Senior Design (CS 4911)</small></h1>
 </div>
-<table class = "center">
-	<tr>
-		<td>
-      <a href="../login" data-no-turbolink="true"><span style="font-size: 22px">Students</span></a>
-		</td>
 
-		<td>
-      <%= link_to 'Sponsors', projects_path, :class => "user-type" %>
-		</td>
-
-		<td>
-      <%= link_to 'Professors', professors_path, :class => "user-type" %>
-		</td>
-	</tr>
-</table>
+<div class="row">
+  <div class="col col-sm-6 col-md-4">
+    <div class="thumbnail" id="first" onclick="window.location.href = '../login'">
+      <div class="caption">
+        <h3>Students</h3><br />
+        <p>
+					<a href="../login" class="btn btn-default" role="button" data-no-turbolink="true">Login</a>
+				</p>
+      </div>
+    </div>
+  </div>
+	<div class="col col-sm-6 col-md-4">
+    <div class="thumbnail" id="second" onclick="window.location.href = '../projects'">
+      <div class="caption">
+        <h3>Sponsors</h3><br />
+        <p>
+					<a href="../projects" class="btn btn-default" role="button" data-no-turbolink="true">Login</a>
+				</p>
+      </div>
+    </div>
+  </div>
+	<div class="col col-sm-6 col-md-4">
+    <div class="thumbnail" id="third" onclick="window.location.href = '../professors'">
+      <div class="caption">
+        <h3>Professors</h3><br />
+        <p>
+					<a href="../professors" class="btn btn-default" role="button" data-no-turbolink="true">Login</a>
+				</p>
+      </div>
+    </div>
+  </div>
+</div>

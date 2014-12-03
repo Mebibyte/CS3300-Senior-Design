@@ -145,12 +145,17 @@
 						</div>
 						<div class="panel-body">
 							<div id="collapseOne" class="panel-collapse collapse in">
-								<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
 								<p>
 									<ul>
 										<li>Email: <%= lookup_object.email.html_safe %></li>
+										<li><%= link_to "Student Page", students_path(lookup_object) %></li>
+									<% lookup_team = Team.find_by_id(lookup_object.team_id) %>
+									<% unless lookup_team.nil? %>
+										<hr />
 										<li>Team Name: <%= lookup_team.name.html_safe %></li>
-										<li>Number of Members: <%= lookup_team.students.length.to_s.html_safe %></li>
+										<li>Team Size: <%= lookup_team.students.length.to_s.html_safe %></li>
+										<li><%= link_to "Team Page", team_path(lookup_team) %></li>
+									<% end %>
 									</ul>
 								</p>
 							</div>
