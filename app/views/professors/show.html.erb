@@ -61,6 +61,14 @@
         </tbody>
       </table>
     </div>
+    <div class="list-group">
+      <%= form_tag import_students_path, multipart: true, :class => "list-group-item form-inline" do %>
+        <%= file_field_tag :file %>
+        <%= submit_tag "Import", :class => "btn btn-default" %>
+      <% end %>
+    </div>
+  </div>
+</div>
 <div class="panel panel-primary">
   <div class="panel-heading">
     <div class="panel-heading">
@@ -82,21 +90,16 @@
         </thead>
         <tbody>
           <% @projects.each do |project| %>
-            <tr>
-              <td><%= project.name %></td>
-              <td><%= project.company_name %></td>
-              <td><%= project.approval  %></td>
-            </tr>
+            <% if project.approval == 1 %>
+	    	<tr>
+              	   <td><%= project.name %></td>
+                   <td><%= project.company_name %></td>
+		   <td><input class="btn btn-primary" name="commit" type="submit" value="Approve Project"></td>
+		   <td><input class="btn btn-primary" name="commit" type="submit" value="Reject Project"></td>
+            	</tr>
+	    <% end %>
           <% end %>
         </tbody>
       </table>
     </div>
-    
-    <div class="list-group">
-      <%= form_tag import_students_path, multipart: true, :class => "list-group-item form-inline" do %>
-        <%= file_field_tag :file %>
-        <%= submit_tag "Import", :class => "btn btn-default" %>
-      <% end %>
-    </div>
-  </div>
-</div>
+</div    
